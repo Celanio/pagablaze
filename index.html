@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Mestre PagaBlaze</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      color: #f44336;
+    }
+    .alerta {
+      font-size: 1.2rem;
+      background: #333;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+    }
+    .copy-btn {
+      background: #f44336;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #777;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>PagaBlaze 🔥</h1>
+  <div class="alerta" id="resultado">Carregando últimos resultados...</div>
+  <button class="copy-btn" onclick="copiarResultados()">Copiar Resultados</button>
+  <footer onclick="contarCliqueRodape()">PagaBlaze</footer>
+
+  <script>
+    let contador = 0;
+    async function carregarResultados() {
+      try {
+        const resposta = await fetch('https://www.tipminer.com/api/blaze/double/history?limit=20');
+        const dados = await resposta.json();
+        const sequencia = dados.map(x => x.color).join(' - ');
+        document.getElementById('resultado').textContent = `Últimos resultados: ${sequencia}`;
+        checarPadrões(dados);
+      } catch (erro) {
+        document.getElementById('resultado').textContent = 'Erro ao carregar dados.';
+      }
+    }
+
+    function copiarResultados() {
+      const texto = document.getElementById('resultado').textContent;
+      navigator.clipboard.writeText(texto);
+      alert('Resultados copiados!');
+    }
+
+    function checarPadrões(dados) {
+      const ultimos = dados.slice(0, 6).map(x => x.color);
+      const brancos = ultimos.filter(x => x === 'white').length;
+      const alerta = document.getElementById('resultado');
+      if (brancos === 0 && ultimos.includes('red') && ultimos.includes('black')) {
+        alerta.textContent += '\n⚠️ Alerta: Alta chance de Branco!';
+        tocarAlerta();
+      }
+    }
+
+    function tocarAlerta() {
+      const audio = new Audio('https://www.soundjay.com/buttons/sounds/beep-07.mp3');
+      audio.play();
+    }
+
+    function contarCliqueRodape() {
+      contador++;
+      if (contador === 4) {
+        alert('🔓 Painel Mestre desbloqueado (em breve).');
+        contador = 0;
+      }
+    }
+
+    setInterval(carregarResultados, 10000);
+    carregarResultados();
+  </script>
+</body>
+</html>
