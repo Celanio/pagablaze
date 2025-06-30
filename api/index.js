@@ -1,26 +1,27 @@
-import { JSDOM } from 'jsdom';
+import * as cheerio from 'cheerio';
 
 export default async function handler(req, res) {
   try {
-    const response = await fetch('https://www.tipminer.com/br/historico/blaze/double');
+    const response = await fetch('https://www.tipmener.com/br/historico/blaze/double');
     const html = await response.text();
-    const dom = new JSDOM(html);
-    const document = dom.window.document;
+    const $ = cheerio.load(html);
 
-    const items = [...document.querySelectorAll('.entry')].map(entry => {
-      const color = entry.classList.contains('white')
-        ? 'white'
-        : entry.classList.contains('red')
-        ? 'red'
-        : 'black';
+    const results = [];
 
-      const number = entry.textContent.trim();
-      return { color, number };
+    $('.entry').each((_, el) => {
+      const text = $(el).text().trim();
+      const classes = $(el).attr('class');
+
+      let color = 'black';
+      if (classes.includes('white')) color = 'white';
+      else if (classes.includes('red')) color = 'red';
+
+      results.push({ color, number: text });
     });
 
-    res.status(200).json({ results: items });
-  } catch (err) {
-    console.error('Erro ao carregar dados:', err);
+    res.status(200).json({ results });
+  } catch (error) {
+    console.error('Erro ao carregar dados:', error);
     res.status(500).json({ error: 'Erro ao carregar dados' });
   }
 }
